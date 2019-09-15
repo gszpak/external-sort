@@ -57,11 +57,7 @@ seastar::future<> create_sorted_temporary_file(seastar::file& input_file, tempor
     return input_file.dma_read_exactly<char>(temporary_file_info.start_offset, temporary_file_info.size).then(
         [&temporary_file_info](const seastar::temporary_buffer<char>& buffer) {
             std::cout << current_shard() << " read " << buffer.size() << " bytes\n";
-            std::vector<seastar::sstring> blocks_vector;
-            for (uint64_t i = 0; i < buffer.size(); i += FILE_BLOCK_SIZE) {
-                seastar::sstring block(buffer.get() + i * sizeof(char), FILE_BLOCK_SIZE);
-                blocks_vector.emplace_back(std::move(block));
-            }
+            std::vector<seastar::sstring> blocks_vector = get_blocks_vector(buffer);
             std::sort(blocks_vector.begin(), blocks_vector.end());
             return write_partial_file(std::move(blocks_vector), temporary_file_info);
         }
