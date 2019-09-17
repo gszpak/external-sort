@@ -33,7 +33,7 @@ open_temporary_files(file_info_vector& temporary_files_info) {
 
 seastar::future<> init_heap(file_info_vector& file_infos, files_vector& temporary_files, blocks_min_heap& min_heap) {
     std::vector<seastar::future<seastar::temporary_buffer<char>>> read_from_files_futures;
-    for (int i = 0; i < temporary_files.size(); ++i) {
+    for (uint64_t i = 0; i < temporary_files.size(); ++i) {
         seastar::file file = temporary_files[i];
         uint64_t file_size = file_infos[i].size;
         read_from_files_futures.emplace_back(file.dma_read_exactly<char>(
@@ -96,7 +96,9 @@ seastar::future<> k_way_merge(file_info_vector& temporary_files) {
             }
             return seastar::do_with(std::move(open_files), [&temporary_files] (auto& open_files) {
                 seastar::sstring out_file_name = "merged_" + seastar::to_sstring(current_shard()) + ".txt";
-                seastar::open_flags flags = seastar::open_flags::wo | seastar::open_flags::create | seastar::open_flags::truncate;
+                seastar::open_flags flags = seastar::open_flags::wo |
+                    seastar::open_flags::create |
+                    seastar::open_flags::truncate;
                 return seastar::open_file_dma(out_file_name, flags).then(
                     [&open_files, &temporary_files](seastar::file out_file) {
                         return seastar::do_with(std::move(out_file), [&open_files, &temporary_files](auto& out_file) {

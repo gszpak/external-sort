@@ -23,8 +23,8 @@ std::vector<temporary_file_info> get_temporary_files_info(ssize_t file_size) {
     return blocks_to_read;
 }
 
-seastar::future<> write_partial_file(
-    std::vector<seastar::sstring>&& blocks_vector, temporary_file_info& temporary_file_info) {
+seastar::future<>
+write_partial_file(std::vector<seastar::sstring>&& blocks_vector, temporary_file_info& temporary_file_info) {
     seastar::sstring out_file_name = "temp_out_" + seastar::to_sstring(temporary_file_info.temporary_file_num) + ".txt";
     seastar::open_flags flags = seastar::open_flags::wo | seastar::open_flags::create | seastar::open_flags::truncate;
     return seastar::open_file_dma(out_file_name, flags).then(
@@ -64,8 +64,8 @@ seastar::future<> create_sorted_temporary_file(seastar::file& input_file, tempor
     );
 }
 
-seastar::future<> create_sorted_temporary_files(
-    seastar::file& input_file, std::vector<temporary_file_info>& temporary_files_info) {
+seastar::future<>
+create_sorted_temporary_files(seastar::file& input_file, std::vector<temporary_file_info>& temporary_files_info) {
     std::vector<seastar::future<>> create_temporary_file_futures;
     for (auto&& temp_file_info : temporary_files_info) {
         std::cout << temp_file_info.start_offset << " " << temp_file_info.size << " " << temp_file_info.temporary_file_num << "\n";
